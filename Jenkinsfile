@@ -1,9 +1,54 @@
 pipeline {
-   agent any
+    agent any
+    // 파이프라인에서 사용할 환경변수 지정
+    environment {
+      START_MESSAGE = "Hello Jenkins :)"
+
+      DEV_SERVER_JAR_PATH = ''
+      DEV_JENKINS_JAR = ''
+      DEV_JAR_NAME = ''
+      DEV_SERVER_PORT = 9092
+
+      LAST_COMMIT = ""
+    }
+
+    // 파이프라인 시작
     stages {
-      stage('stage 1'){
+
+      stage('[Dev] Checkout') {
+        when {
+          branch 'dev'
+        }
+        script {
+            checkout scm
+        }
+      }
+
+      stage('[Dev] Build'){
+        when {
+          branch 'dev'
+        }
         steps {
-          echo "Hello World2"
+          echo START_MESSAGE
+          sh './gradlew clean build -Pprofile=dev'
+        }
+      }
+
+      stage('[Dev] Backup Jar'){
+        when {
+          branch 'dev'
+        }
+        steps {
+
+        }
+      }
+
+      stage('[Dev] Deploy'){
+        when {
+          branch 'dev'
+        }
+        steps {
+
         }
       }
     }
