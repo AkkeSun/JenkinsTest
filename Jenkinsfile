@@ -19,8 +19,10 @@ pipeline {
         when {
           branch 'dev'
         }
-        script {
-            checkout scm
+        step {
+          script {
+              checkout scm
+          }
         }
       }
 
