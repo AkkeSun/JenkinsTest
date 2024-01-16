@@ -36,22 +36,6 @@ pipeline {
         }
       }
 
-      stage('[Dev] Backup Jar'){
-        when {
-          branch 'dev'
-        }
-        steps {
 
-        }
-      }
-
-      stage('[Dev] Deploy'){
-        when {
-          branch 'dev'
-        }
-        steps {
-
-        }
-      }
     }
 }
