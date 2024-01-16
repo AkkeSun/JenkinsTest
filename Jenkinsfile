@@ -15,17 +15,6 @@ pipeline {
     // 파이프라인 시작
     stages {
 
-      stage('[Dev] Checkout') {
-        when {
-          branch 'dev'
-        }
-        steps {
-          script {
-              checkout scm
-          }
-        }
-      }
-
       stage('[Dev] Build'){
         when {
           branch 'dev'
@@ -35,7 +24,6 @@ pipeline {
           sh './gradlew clean build -Pprofile=dev'
         }
       }
-
 
     }
 }
