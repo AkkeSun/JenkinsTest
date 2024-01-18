@@ -32,9 +32,9 @@ pipeline {
           script {
             // Folder Property 플러그인을 이용하여 Jenkins 설정에서 정의한 환경변수 로드
             wrap([$class: 'ParentFolderBuildWrapper']) {
-                host = ${env.PROD_HOST}
-                username = ${env.PROD_USERNAME}
-                password = ${env.PROD_PASSWORD}
+                host = "${env.PROD_HOST}"
+                username = "${env.PROD_USERNAME}"
+                password = "${env.PROD_PASSWORD}"
             }
 
             // 서버 접속을 위한 설정
