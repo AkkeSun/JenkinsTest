@@ -41,7 +41,8 @@ pipeline {
             def remote = setRemote(host, username, password)
 
             // 서버 접근하여 백업파일 생성
-            sh "sshpass -p ${remote.password} ssh ${remote.user}@${remote.host} 'cp ${DEV_SERVER_JAR_PATH}/${DEV_JAR_NAME} ${DEV_SERVER_JAR_PATH}/${DEV_JAR_NAME}_${TODAY}.jar'"
+            sshCommand remote: remote, command: "echo 'hello'"
+            sshCommand remote: remote, command: "cp ${DEV_SERVER_JAR_PATH}/${DEV_JAR_NAME} ${DEV_SERVER_JAR_PATH}/${DEV_JAR_NAME}_${TODAY}.jar"
           }
         }
       }
