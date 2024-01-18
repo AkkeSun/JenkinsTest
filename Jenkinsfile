@@ -29,19 +29,19 @@ pipeline {
           branch 'dev'
         }
         steps {
+          script {
+            // Folder Property 플러그인을 이용하여 Jenkins 설정에서 정의한 환경변수 로드
+            wrap([$class: 'ParentFolderBuildWrapper']) {
+                username = "${env.PROD_USERNAME}"
+                password = "${env.PROD_PASSWORD}"
+                host = "${env.PROD_HOST}"
+            }
+            // 서버 접속을 위한 설정
+            def remote = setRemote(host01, username, password)
 
-         // : Folder Property 플러그인을 이용하여 Jenkins 설정에서 정의한 환경변수 로드
-          wrap([$class: 'ParentFolderBuildWrapper']) {
-              username = "${env.PROD_USERNAME}"
-              password = "${env.PROD_PASSWORD}"
-              host = "${env.PROD_HOST}"
+            // 서버 접근하여 백업파일 생성
+            sshCommand remote: remote, command: "cp ${DEV_SERVER_JAR_PATH}/${DEV_JAR_NAME} ${DEV_SERVER_JAR_PATH}/${DEV_JAR_NAME}_${TODAY}.jar"
           }
-
-          // 서버 접속을 위한 설정
-          def remote = setRemote(host01, username, password)
-
-          // 서버 접근하여 백업파일 생성
-          sshCommand remote: remote, command: "cp ${DEV_SERVER_JAR_PATH}/${DEV_JAR_NAME} ${DEV_SERVER_JAR_PATH}/${DEV_JAR_NAME}_${TODAY}.jar"
         }
       }
     }
