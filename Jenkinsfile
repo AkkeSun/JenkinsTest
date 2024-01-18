@@ -37,6 +37,7 @@ pipeline {
                 password = "${env.PROD_PASSWORD}"
             }
 
+
             // 서버 접속을 위한 설정
             def remote = setRemote(host, username, password)
 
