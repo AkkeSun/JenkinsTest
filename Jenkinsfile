@@ -9,8 +9,7 @@ pipeline {
       DEV_JENKINS_SERVER_JAR = '/var/lib/jenkins/workspace/JenkinsTest_dev/build/libs/JenkinsTest-dev.jar'
       DEV_SERVER_PORT = 8080
 
-      COMMIT_MSG = ""
-      SLEEP_SECONDS=5
+      LAST_COMMIT = ""
       TODAY= java.time.LocalDate.now()
     }
 
@@ -20,30 +19,11 @@ pipeline {
           branch 'dev'
         }
         steps {
-          sh './gradlew clean build -Pprofile=dev'
-        }
-      }
-
-      stage('[Dev] Backup Jar'){
-        when {
-          branch 'dev'
-        }
-        steps {
           script {
-            // Folder Property 플러그인을 이용하여 Jenkins 설정에서 정의한 환경변수 로드
-            wrap([$class: 'ParentFolderBuildWrapper']) {
-                host = "${env.PROD_HOST}"
-                username = "${env.PROD_USERNAME}"
-                password = "${env.PROD_PASSWORD}"
-            }
-
-            def remote = setRemote(host, username, password)
-
-            // sshCommand, sshPut : ssh pipeline steps 플러그인 사용
-            // 중도 계정을 변경하는 경우 ===> sshCommand remote: remote, command: "cd ${SERVER_JAR_PATH} && echo '${sweetPassword}' | su sweet -c '${SERVER_JAR_PATH}/service.sh stop'"
-            // 서버 접근하여 백업파일 생성
-            sshCommand remote: remote, command: "cp ${DEV_SERVER_JAR_PATH}/${DEV_JAR_NAME} ${DEV_SERVER_JAR_PATH}/${DEV_JAR_NAME}_${TODAY}.jar"
+              LAST_COMMIT = sh(returnStdout: true, script: "git log -1 --pretty=%B").trim()
           }
+
+          sh './gradlew clean build -Pprofile=dev'
         }
       }
 
@@ -53,17 +33,31 @@ pipeline {
         }
         steps {
           script {
+
+            // ------ use Folder Property plugin
+            // Jenkins environment variable setting
+            wrap([$class: 'ParentFolderBuildWrapper']) {
+                host = "${env.PROD_HOST}"
+                username = "${env.PROD_USERNAME}"
+                password = "${env.PROD_PASSWORD}"
+            }
             def remote = setRemote(host, username, password)
 
-            // Jenkins server -> 운영서버 Jar 전송
+            // ------ use SSH pipeline steps plugin
+            // make backup jar
+            sshCommand remote: remote, command: "cp ${DEV_SERVER_JAR_PATH}/${DEV_JAR_NAME} ${DEV_SERVER_JAR_PATH}/${DEV_JAR_NAME}_${TODAY}.jar"
+
+            // send jar ()Jenkins server -> service server)
             sshPut remote: remote, from: env.DEV_JENKINS_SERVER_JAR, into: env.DEV_SERVER_JAR_PATH
 
-            // 기존 서비스 stop
+            // service stop
             sshCommand remote: remote, command: "cd ${DEV_SERVER_JAR_PATH} && ./service.sh stop"
             sleep(2)
 
-            // 신규 서비스 start
+            // service start
             sshCommand remote: remote, command: "cd ${DEV_SERVER_JAR_PATH} && ./service.sh start"
+
+            // sshCommand remote: remote, command: "cd ${SERVER_JAR_PATH} && echo '${sweetPassword}' | su sweet -c '${SERVER_JAR_PATH}/service.sh stop'"
           }
         }
       }
