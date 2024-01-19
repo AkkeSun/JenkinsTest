@@ -41,6 +41,7 @@ pipeline {
             def remote = setRemote(host, username, password)
 
             // sshCommand, sshPut : ssh pipeline steps 플러그인 사용
+            // 중도 계정을 변경하는 경우 ===> sshCommand remote: remote, command: "cd ${SERVER_JAR_PATH} && echo '${sweetPassword}' | su sweet -c '${SERVER_JAR_PATH}/service.sh stop'"
             // 서버 접근하여 백업파일 생성
             sshCommand remote: remote, command: "cp ${DEV_SERVER_JAR_PATH}/${DEV_JAR_NAME} ${DEV_SERVER_JAR_PATH}/${DEV_JAR_NAME}_${TODAY}.jar"
           }
@@ -55,9 +56,6 @@ pipeline {
           script {
             def remote = setRemote(host, username, password)
 
-            // 중도 계정을 변경하는 경우
-            // sshCommand remote: remote, command: "cd ${SERVER_JAR_PATH} && echo '${sweetPassword}' | su sweet -c '${SERVER_JAR_PATH}/service.sh stop'"
-
             // Jenkins server -> 운영서버 Jar 전송
             sshPut remote: remote, from: env.DEV_JENKINS_SERVER_JAR, into: env.DEV_SERVER_JAR_PATH
 
@@ -67,42 +65,9 @@ pipeline {
 
             // 신규 서비스 start
             sshCommand remote: remote, command: "cd ${DEV_SERVER_JAR_PATH} && ./service.sh start"
-            sleep(sleepSeconds)
           }
         }
       }
-
-
-      stage('[Dev] Service Stop'){
-        when {
-          branch 'dev'
-        }
-        steps {
-          script {
-            def remote = setRemote(host, username, password)
-            // && 여러 명령어 연결
-            // echo ${password} | sudo -S ./service.sh stop : 명령어에 입력값이 필요한 경유
-            sshCommand remote: remote, command: "cd ${DEV_SERVER_JAR_PATH} && ./service.sh stop"
-            sleep(sleepSeconds)
-           }
-        }
-      }
-
-      stage('[Dev] Service start'){
-        when {
-          branch 'dev'
-        }
-        steps {
-          script {
-            def remote = setRemote(host, username, password)
-            // && 여러 명령어 연결
-            // echo ${password} | sudo -S ./service.sh stop : 명령어에 입력값이 필요한 경유
-            sshCommand remote: remote, command: "cd ${DEV_SERVER_JAR_PATH} && ./service.sh start"
-            sleep(sleepSeconds)
-           }
-        }
-      }
-
     }
 }
 
