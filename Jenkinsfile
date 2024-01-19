@@ -7,7 +7,7 @@ pipeline {
 
       DEV_JAR_NAME = 'JenkinsTest-dev.jar'
       DEV_SERVER_JAR_PATH = '/home/od'
-      DEV_JENKINS_SERVER_JAR = '/data/application/JenkinsTest/JenkinsTest-dev.jar'
+      DEV_JENKINS_SERVER_JAR = '/data/application/workspaceJenkinsTest/JenkinsTest_dev/build/libs/JenkinsTest_dev.jar'
       DEV_SERVER_PORT = 8080
 
       COMMIT_MSG = ""
@@ -24,9 +24,6 @@ pipeline {
         steps {
           echo env.START_MESSAGE
           sh './gradlew clean build -Pprofile=dev'
-
-          // build 파일을 jar stash 에 임시저장
-          stash(name: 'jar', includes: '/home/od/jenkins_home/workspace/JenkinsTest_dev/build/libs/*.jar')
         }
       }
 
@@ -44,11 +41,6 @@ pipeline {
             }
 
             def remote = setRemote(host, username, password)
-
-            // jar stash 파일을 해당 경로로 이동
-            dir('/data/application/JenkinsTest') {
-                unstash 'jar'
-            }
 
             // sshCommand, sshPut : ssh pipeline steps 플러그인
             // 서버 접근하여 백업파일 생성
