@@ -7,7 +7,7 @@ pipeline {
 
       DEV_JAR_NAME = 'JenkinsTest-dev.jar'
       DEV_SERVER_JAR_PATH = '/home/od'
-      DEV_JENKINS_SERVER_JAR = '/data/application/workspaceJenkinsTest/JenkinsTest_dev/build/libs/JenkinsTest_dev.jar'
+      DEV_JENKINS_SERVER_JAR = '/data/application/workspace/JenkinsTest_dev/build/libs/JenkinsTest_dev.jar'
       DEV_SERVER_PORT = 8080
 
       COMMIT_MSG = ""
