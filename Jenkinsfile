@@ -26,7 +26,7 @@ pipeline {
           sh './gradlew clean build -Pprofile=dev'
 
           // build 파일을 jar stash 에 임시저장
-          stash(name: 'jar', includes: 'build/*.jar')
+          stash(name: 'jar', includes: '/home/od/jenkins_home/workspace/JenkinsTest_dev/build/libs/*.jar')
         }
       }
 
