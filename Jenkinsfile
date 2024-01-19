@@ -10,7 +10,6 @@ pipeline {
       DEV_SERVER_PORT = 8080
 
       COMMIT_MSG = ""
-      CHECK_STATUS_COUNT=20
       SLEEP_SECONDS=5
       TODAY= java.time.LocalDate.now()
     }
@@ -61,7 +60,7 @@ pipeline {
 
             // 기존 서비스 stop
             sshCommand remote: remote, command: "cd ${DEV_SERVER_JAR_PATH} && ./service.sh stop"
-            sleep(sleepSeconds)
+            sleep(2)
 
             // 신규 서비스 start
             sshCommand remote: remote, command: "cd ${DEV_SERVER_JAR_PATH} && ./service.sh start"
