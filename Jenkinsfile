@@ -70,10 +70,7 @@ pipeline {
         steps {
           script {
             def remote = setRemote(host, username, password)
-            sshCommand remote: remote, command: '''
-                cd ${DEV_SERVER_JAR_PATH}
-                echo remote.password | sudo ./service.sh stop
-              '''
+            sshCommand remote: remote, command: "cd ${DEV_SERVER_JAR_PATH} && echo ${password} | sudo ./service.sh stop"
 
             def isStopped = checkStop(remote, env.DEV_JAR_NAME, 1, env.CHECK_STATUS_COUNT.toInteger(), env.SLEEP_SECONDS)
             if(!isStopped) {
