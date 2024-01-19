@@ -22,8 +22,6 @@ pipeline {
           branch 'dev'
         }
         steps {
-          COMMIT_MSG = '[Dev] Build fail'
-
           echo env.START_MESSAGE
           sh './gradlew clean build -Pprofile=dev'
         }
@@ -35,8 +33,6 @@ pipeline {
         }
         steps {
           script {
-            COMMIT_MSG = '[Dev] jar backup fail'
-
             // Folder Property 플러그인을 이용하여 Jenkins 설정에서 정의한 환경변수 로드
             wrap([$class: 'ParentFolderBuildWrapper']) {
                 host = "${env.PROD_HOST}"
@@ -59,7 +55,6 @@ pipeline {
         }
         steps {
           script {
-            COMMIT_MSG = '[Dev] jar backup fail'
             wrap([$class: 'ParentFolderBuildWrapper']) {
                 host = "${env.PROD_HOST}"
                 username = "${env.PROD_USERNAME}"
