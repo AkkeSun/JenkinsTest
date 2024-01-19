@@ -71,11 +71,11 @@ pipeline {
           script {
             def remote = setRemote(host, username, password)
             // && 여러 명령어 연결
-            // echo ${value} | 명령어 : 명령어에 입력값이 필요한 경유
-            sshCommand remote: remote, command: "cd ${DEV_SERVER_JAR_PATH} && echo ${password} | sudo -S ./service.sh stop"
+            // echo ${password} | sudo -S ./service.sh stop : 명령어에 입력값이 필요한 경유
+            sshCommand remote: remote, command: "cd ${DEV_SERVER_JAR_PATH} && ./service.sh stop"
 
             def isStopped = checkStop(remote, env.DEV_JAR_NAME, 1, env.CHECK_STATUS_COUNT.toInteger(), env.SLEEP_SECONDS)
-            if(!isStopped) {
+            if(isStopped != true) {
               sh 'exit 1'
             } else {
               echo 'service stop success'
