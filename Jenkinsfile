@@ -107,7 +107,7 @@ def checkStop(remote, jarName, executeCnt, checkCnt, sleepSeconds) {
       throw new Exception("Server not Stop - executed over 3 times stop-count script")
     }
 
-    def processInfo = sshCommand remote: remote, command: "ps -ef | grep -v 'grep'| grep " + jarName;
+    def processInfo = sshCommand remote: remote, command: "echo ${remote.password} | sudo -S ps -ef | grep -v 'grep'| grep " + jarName;
     if(!processInfo.trim()) {
       return true;
     }
