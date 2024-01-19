@@ -1,7 +1,7 @@
 pipeline {
     agent any
 
-    // 파이프라인에서 사용할 환경변수 지정
+    // environment variable setting
     environment {
 
       DEV_JAR_NAME = 'JenkinsTest-dev.jar'
@@ -47,7 +47,7 @@ pipeline {
             // make backup jar
             sshCommand remote: remote, command: "cp ${DEV_SERVER_JAR_PATH}/${DEV_JAR_NAME} ${DEV_SERVER_JAR_PATH}/${DEV_JAR_NAME}_${TODAY}.jar"
 
-            // send jar ()Jenkins server -> service server)
+            // send jar (Jenkins server -> service server)
             sshPut remote: remote, from: env.DEV_JENKINS_SERVER_JAR, into: env.DEV_SERVER_JAR_PATH
 
             // service stop
