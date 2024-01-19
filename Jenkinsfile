@@ -75,25 +75,27 @@ pipeline {
           branch 'dev'
         }
         steps {
-          wrap([$class: 'ParentFolderBuildWrapper']) {
-              host = "${env.PROD_HOST}"
-              username = "${env.PROD_USERNAME}"
-              password = "${env.PROD_PASSWORD}"
-          }
+          script {
+            wrap([$class: 'ParentFolderBuildWrapper']) {
+                host = "${env.PROD_HOST}"
+                username = "${env.PROD_USERNAME}"
+                password = "${env.PROD_PASSWORD}"
+            }
 
-          def remote = setRemote(host, username, password)
+            def remote = setRemote(host, username, password)
 
-          sshCommand remote: remote, command: '''
-              cd ${DEV_SERVER_JAR_PATH}
-              echo remote.password | sudo ./service.sh stop
-            '''
+            sshCommand remote: remote, command: '''
+                cd ${DEV_SERVER_JAR_PATH}
+                echo remote.password | sudo ./service.sh stop
+              '''
 
-          def isStopped = checkStop(remote, env.DEV_JAR_NAME, 1, env.CHECK_STATUS_COUNT.toInteger(), env.SLEEP_SECONDS)
-          if(!isStopped) {
-            sh 'exit 1'
-          } else {
-            echo 'service stop success'
-          }
+            def isStopped = checkStop(remote, env.DEV_JAR_NAME, 1, env.CHECK_STATUS_COUNT.toInteger(), env.SLEEP_SECONDS)
+            if(!isStopped) {
+              sh 'exit 1'
+            } else {
+              echo 'service stop success'
+            }
+           }
         }
       }
 
