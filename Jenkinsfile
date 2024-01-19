@@ -3,7 +3,6 @@ pipeline {
 
     // 파이프라인에서 사용할 환경변수 지정
     environment {
-      START_MESSAGE = "Hello Jenkins :)"
 
       DEV_JAR_NAME = 'JenkinsTest-dev.jar'
       DEV_SERVER_JAR_PATH = '/home/od'
@@ -22,7 +21,6 @@ pipeline {
           branch 'dev'
         }
         steps {
-          echo env.START_MESSAGE
           sh './gradlew clean build -Pprofile=dev'
         }
       }
@@ -75,7 +73,8 @@ pipeline {
             sshCommand remote: remote, command: "cd ${DEV_SERVER_JAR_PATH} && ./service.sh stop"
 
             def isStopped = checkStop(remote, env.DEV_JAR_NAME, 1, env.CHECK_STATUS_COUNT.toInteger(), env.SLEEP_SECONDS)
-            if(isStopped != true) {
+            echo ${isStopped}
+            if(!isStopped) {
               sh 'exit 1'
             } else {
               echo 'service stop success'
@@ -109,7 +108,6 @@ def checkStop(remote, jarName, executeCnt, checkCnt, sleepSeconds) {
     }
 
     def processInfo = sshCommand remote: remote, command: "ps -ef | grep -v 'grep'| grep " + jarName;
-    echo processInfo
     if(!processInfo.trim()) {
       return true;
     }
