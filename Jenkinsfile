@@ -49,7 +49,7 @@ pipeline {
         }
       }
 
-      stage('[Dev] Deploy'){
+      stage('[Dev] Replace Jar'){
         when {
           branch 'dev'
         }
@@ -108,7 +108,7 @@ def checkStop(remote, jarName, executeCnt, checkCnt, sleepSeconds) {
       throw new Exception("Server not Stop - executed over 3 times stop-count script")
     }
 
-    def processInfo = sshCommand remote: remote, command: 'ps -ef | grep ' + jarName;
+    def processInfo = sshCommand remote: remote, command: "ps -ef | grep -v 'grep'| grep " + jarName;
     if(!processInfo.trim()) {
       return true;
     }
