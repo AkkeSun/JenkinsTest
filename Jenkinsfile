@@ -109,6 +109,7 @@ def checkStop(remote, jarName, executeCnt, checkCnt, sleepSeconds) {
     }
 
     def processInfo = sshCommand remote: remote, command: "ps -ef | grep -v 'grep'| grep " + jarName;
+    echo processInfo
     if(!processInfo.trim()) {
       return true;
     }
