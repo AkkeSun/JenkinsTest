@@ -1,4 +1,4 @@
-package com.example.jenkinstest;
+package com.example.jenkinstest.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class HealthCheckController {
 
-    @GetMapping("/check")
+    @GetMapping("/healthCheck")
     public String healthCheck () {
         return "success";
     }
