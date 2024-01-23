@@ -31,10 +31,10 @@ pipeline {
               // git last commit setting (for Slack Notification)
               LAST_COMMIT = sh(returnStdout: true, script: "git log -1 --pretty=%B").trim()
 
-              echo 'service host -- ' + host + ':' + port
-              echo 'service username -- ' + username
-              echo 'service password -- ' + password
-              echo 'last commit -- ' + LAST_COMMIT
+              echo '[host] ' + host + ':' + port
+              echo '[username] ' + username
+              echo '[password] ' + password
+              echo '[last commit] ' + LAST_COMMIT
           }
         }
       }
