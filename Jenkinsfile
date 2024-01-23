@@ -48,7 +48,6 @@ pipeline {
 
             // send jar (Jenkins server -> service server)
             sshPut remote: remote, from: env.DEV_JENKINS_SERVER_JAR, into: env.DEV_SERVER_JAR_PATH
-
           }
         }
       }
@@ -65,16 +64,7 @@ pipeline {
             // service stop
             sshCommand remote: remote, command: "cd ${DEV_SERVER_JAR_PATH} && ./service.sh stop"
             sleep(2)
-
-            // health check
-            try {
-              def healthCheck = sh "curl ${host}:${port}/healthCheck"
-              echo 'service stop fail'
-              sh 'exit 1'
-
-            } catch (Exception e) {
-              echo 'service stop success'
-            }
+            healthCheck(host, port, "stop")
 
             // sshCommand remote: remote, command: "cd ${SERVER_JAR_PATH} && echo '${sweetPassword}' | su sweet -c '${SERVER_JAR_PATH}/service.sh stop'"
           }
@@ -93,21 +83,7 @@ pipeline {
             // service start
             sshCommand remote: remote, command: "cd ${DEV_SERVER_JAR_PATH} && ./service.sh start"
             sleep(5)
-
-            // health check
-            try {
-              def healthCheck = sh(script: "curl ${host}:${port}/healthCheck", returnStdout: true)
-              echo healthCheck
-              if(healthCheck == "Y") {
-                echo 'service start success'
-              } else {
-                throw new RuntimeException()
-              }
-
-            } catch (Exception e) {
-              echo 'service start fail'
-              sh 'exit 1'
-            }
+            healthCheck(host, port, "start")
 
           }
         }
@@ -115,6 +91,7 @@ pipeline {
 
     }
 }
+
 
 def setRemote(host, username, password) {
     def remote = [:]
@@ -126,4 +103,26 @@ def setRemote(host, username, password) {
     remote.password = password
 
     return remote
+}
+
+def healthCheck(host, port, type) {
+    try {
+      def checkResult = "curl ${host}:${port}/healthCheck".execute().text
+
+      if(checkResult == "Y") {
+        if(type == "stop") {
+           echo 'service stop fail'
+           sh 'exit 1'
+        } else {
+           throw new RuntimeException();
+        }
+      }
+
+    } catch (Exception e) {
+
+      if(type == "start") {
+        echo 'service start fail'
+        sh 'exit 1'
+      }
+    }
 }
