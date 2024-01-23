@@ -58,10 +58,8 @@ pipeline {
         }
         steps {
           script {
-
             def remote = setRemote(host, username, password)
 
-            // service stop
             sshCommand remote: remote, command: "cd ${DEV_SERVER_JAR_PATH} && ./service.sh stop"
             sleep(2)
             healthCheck(host, port, "stop")
@@ -77,10 +75,8 @@ pipeline {
         }
         steps {
           script {
-
             def remote = setRemote(host, username, password)
 
-            // service start
             sshCommand remote: remote, command: "cd ${DEV_SERVER_JAR_PATH} && ./service.sh start"
             sleep(5)
             healthCheck(host, port, "start")
@@ -91,7 +87,6 @@ pipeline {
 
     }
 }
-
 
 def setRemote(host, username, password) {
     def remote = [:]
@@ -108,6 +103,7 @@ def setRemote(host, username, password) {
 def healthCheck(host, port, type) {
     try {
       def checkResult = "curl ${host}:${port}/healthCheck".execute().text
+      echo checkResult
 
       if(checkResult == "Y") {
         if(type == "stop") {
