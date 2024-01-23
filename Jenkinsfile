@@ -37,6 +37,7 @@ pipeline {
             // Jenkins environment variable setting
             wrap([$class: 'ParentFolderBuildWrapper']) {
                 host = "${env.DEV_HOST}"
+                port = "${env.DEV_PORT}"
                 username = "${env.DEV_USERNAME}"
                 password = "${env.DEV_PASSWORD}"
             }
@@ -55,7 +56,7 @@ pipeline {
 
             // service stop check
             sleep(2)
-            def healthCheck = sh "curl ${env.DEV_HOST}:${env.DEV_PORT}/healthCheck"
+            def healthCheck = sh "curl ${host}:${port}/healthCheck"
             if(healthCheck) {
               echo 'service stop fail'
               sh 'exit 1'
@@ -65,7 +66,7 @@ pipeline {
             sshCommand remote: remote, command: "cd ${DEV_SERVER_JAR_PATH} && ./service.sh start"
 
             // service start check
-            healthCheck = sh "curl ${env.DEV_HOST}:${env.DEV_PORT}/healthCheck"
+            healthCheck = sh "curl ${host}:${port}/healthCheck"
             if(healthCheck == 'Y') {
               echo 'Deploy success'
             } else {
