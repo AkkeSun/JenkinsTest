@@ -96,7 +96,7 @@ pipeline {
 
             // health check
             try {
-              def healthCheck =  sh(script: "curl ${host}:${port}/healthCheck", returnStatus: true,  returnStdout: true)
+              def healthCheck = sh(script: "curl ${host}:${port}/healthCheck", returnStdout: true)
               echo healthCheck
               if(healthCheck == "Y") {
                 echo 'service start success'
