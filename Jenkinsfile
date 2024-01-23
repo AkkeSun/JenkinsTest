@@ -36,9 +36,9 @@ pipeline {
             // ------ use Folder Property plugin
             // Jenkins environment variable setting
             wrap([$class: 'ParentFolderBuildWrapper']) {
-                host = "${env.PROD_HOST}"
-                username = "${env.PROD_USERNAME}"
-                password = "${env.PROD_PASSWORD}"
+                host = "${env.DEV_HOST}"
+                username = "${env.DEV_USERNAME}"
+                password = "${env.DEV_PASSWORD}"
             }
             def remote = setRemote(host, username, password)
 
