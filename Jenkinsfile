@@ -98,7 +98,7 @@ pipeline {
             try {
 
               def healthCheck = sh "curl ${host}:${port}/healthCheck"
-              if(healthCheck == 'Y') {
+              if(healthCheck == "Y") {
                 echo 'service start success'
                 sh 'exit 1'
               } else {
