@@ -86,12 +86,13 @@ pipeline {
       }
     }
 
+    // ------ use Slack Notification plugin
     post {
        success {
-            echo 'I succeeded!'
+            slackSend color: "good", message: "✅Build Success!\n\n\n PROJECT             : ${JOB_NAME}\n BRANCH             : ${env.BRANCH_NAME}\n JENKINS URL     : <${env.RUN_DISPLAY_URL}|Blue Ocean Link>\n LAST_COMMIT  : ${LAST_COMMIT}"
        }
        failure {
-            echo 'I failed :('
+            slackSend color: "danger", message: "❌Build Fail!\n\n\n PROJECT             : ${JOB_NAME}\n BRANCH             : ${env.BRANCH_NAME}\n JENKINS URL     : <${env.RUN_DISPLAY_URL}|Blue Ocean Link>\n LAST_COMMIT  : ${LAST_COMMIT}"
        }
     }
 
