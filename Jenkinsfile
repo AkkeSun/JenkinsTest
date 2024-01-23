@@ -7,8 +7,6 @@ pipeline {
       DEV_JAR_NAME = 'JenkinsTest-dev.jar'
       DEV_SERVER_JAR_PATH = '/home/od'
       DEV_JENKINS_SERVER_JAR = '/var/lib/jenkins/workspace/JenkinsTest_dev/build/libs/JenkinsTest-dev.jar'
-      DEV_SERVER_PORT = 8080
-      DEV_HEALTH_CHECK_URL = 'curl http://127.0.0.1:8080/healthCheck'
 
       LAST_COMMIT = ""
       TODAY= java.time.LocalDate.now()
@@ -57,7 +55,7 @@ pipeline {
 
             // service stop check
             sleep(2)
-            def healthCheck = sshCommand remote: remote, command: "curl http://127.0.0.1:8080/healthCheck"
+            def healthCheck = sh "curl ${env.DEV_HOST}:${env.DEV_PORT}/healthCheck"
             if(healthCheck) {
               echo 'service stop fail'
               sh 'exit 1'
@@ -67,7 +65,7 @@ pipeline {
             sshCommand remote: remote, command: "cd ${DEV_SERVER_JAR_PATH} && ./service.sh start"
 
             // service start check
-            healthCheck = sshCommand remote: remote, command: "curl http://127.0.0.1:8080/healthCheck"
+            healthCheck = sh "curl ${env.DEV_HOST}:${env.DEV_PORT}/healthCheck"
             if(healthCheck == 'Y') {
               echo 'Deploy success'
             } else {
