@@ -61,8 +61,7 @@ pipeline {
             def remote = setRemote(host, username, password)
 
             sshCommand remote: remote, command: "cd ${DEV_SERVER_JAR_PATH} && ./service.sh stop"
-            sleep(2)
-            healthCheck(host, port, "stop")
+            healthCheck(host, port, "stop", 2)
 
             // sshCommand remote: remote, command: "cd ${SERVER_JAR_PATH} && echo '${sweetPassword}' | su sweet -c '${SERVER_JAR_PATH}/service.sh stop'"
           }
@@ -78,9 +77,7 @@ pipeline {
             def remote = setRemote(host, username, password)
 
             sshCommand remote: remote, command: "cd ${DEV_SERVER_JAR_PATH} && ./service.sh start"
-            sleep(5)
-            healthCheck(host, port, "start")
-
+            healthCheck(host, port, "start", 5)
           }
         }
       }
@@ -100,22 +97,23 @@ def setRemote(host, username, password) {
     return remote
 }
 
-def healthCheck(host, port, type) {
+
+def healthCheck(host, port, type, sleepSecond) {
+    sleep(sleepSecond)
+
     try {
       def checkResult = sh(script: "curl ${host}:${port}/healthCheck", returnStdout: true)
-      echo checkResult
 
       if(checkResult == "Y") {
         if(type == "stop") {
            echo 'service stop fail'
            sh 'exit 1'
-        } else {
-           throw new RuntimeException();
         }
+      } else {
+         throw new RuntimeException();
       }
 
     } catch (Exception e) {
-
       if(type == "start") {
         echo 'service start fail'
         sh 'exit 1'
