@@ -111,10 +111,10 @@ def healthCheck(host, port, type, sleepSecond) {
 
       if(checkResult == "Y") {
           if(type == "stop") {
-             echo 'service stop fail'
+             echo '[service stop] fail'
              sh 'exit 1'
           }
-          echo 'service start success'
+          echo '[service start] success'
 
       } else {
           throw new RuntimeException();
@@ -122,9 +122,9 @@ def healthCheck(host, port, type, sleepSecond) {
 
     } catch (Exception e) {
         if(type == "start") {
-            echo 'service start fail'
+            echo '[service start] fail'
             sh 'exit 1'
         }
-        echo 'service stop success'
+        echo '[service stop] success'
     }
 }
