@@ -98,9 +98,9 @@ pipeline {
             try {
 
               def healthCheck = sh "curl ${host}:${port}/healthCheck"
+              echo healthCheck
               if(healthCheck == "Y") {
                 echo 'service start success'
-                sh 'exit 1'
               } else {
                 throw new RuntimeException()
               }
