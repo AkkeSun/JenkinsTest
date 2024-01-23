@@ -67,7 +67,7 @@ pipeline {
             sshCommand remote: remote, command: "cd ${DEV_SERVER_JAR_PATH} && ./service.sh start"
 
             // service start check
-            def healthCheck = sshCommand remote: remote, command: "curl http://127.0.0.1:8080/healthCheck"
+            healthCheck = sshCommand remote: remote, command: "curl http://127.0.0.1:8080/healthCheck"
             if(healthCheck == 'Y') {
               echo 'Deploy success'
             } else {
