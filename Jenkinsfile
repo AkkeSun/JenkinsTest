@@ -26,13 +26,12 @@ pipeline {
         }
       }
 
-      stage('[Dev] Deploy'){
+      stage ('[Dev] Replace Jar') {
         when {
           branch 'dev'
         }
         steps {
           script {
-
             // ------ use Folder Property plugin
             // Jenkins environment variable setting
             wrap([$class: 'ParentFolderBuildWrapper']) {
@@ -43,7 +42,6 @@ pipeline {
             }
             def remote = setRemote(host, username, password)
 
-
             // ------ use SSH pipeline steps plugin
             // make backup jar
             sshCommand remote: remote, command: "cp ${DEV_SERVER_JAR_PATH}/${DEV_JAR_NAME} ${DEV_SERVER_JAR_PATH}/${DEV_JAR_NAME}_${TODAY}.jar"
@@ -51,32 +49,67 @@ pipeline {
             // send jar (Jenkins server -> service server)
             sshPut remote: remote, from: env.DEV_JENKINS_SERVER_JAR, into: env.DEV_SERVER_JAR_PATH
 
+          }
+        }
+      }
+
+      stage('[Dev] Service stop'){
+        when {
+          branch 'dev'
+        }
+        steps {
+          script {
+
+            def remote = setRemote(host, username, password)
+
             // service stop
             sshCommand remote: remote, command: "cd ${DEV_SERVER_JAR_PATH} && ./service.sh stop"
-
-            // service stop check
             sleep(2)
-            def healthCheck = sh "curl ${host}:${port}/healthCheck"
-            if(healthCheck) {
+
+            // health check
+            try {
+              def healthCheck = sh "curl ${host}:${port}/healthCheck"
               echo 'service stop fail'
               sh 'exit 1'
-            }
-
-            // service start
-            sshCommand remote: remote, command: "cd ${DEV_SERVER_JAR_PATH} && ./service.sh start"
-
-            // service start check
-            healthCheck = sh "curl ${host}:${port}/healthCheck"
-            if(healthCheck == 'Y') {
-              echo 'Deploy success'
-            } else {
-              echo 'service start fail'
-              sh 'exit 1'
+            } catch (exception e) {
+              echo 'service stop success'
             }
 
             // sshCommand remote: remote, command: "cd ${SERVER_JAR_PATH} && echo '${sweetPassword}' | su sweet -c '${SERVER_JAR_PATH}/service.sh stop'"
           }
         }
+
+        stage ('[Dev] Service start') {
+          when {
+            branch 'dev'
+          }
+          steps {
+            script {
+
+              def remote = setRemote(host, username, password)
+
+              // service start
+              sshCommand remote: remote, command: "cd ${DEV_SERVER_JAR_PATH} && ./service.sh start"
+              sleep(5)
+
+              // health check
+              try {
+                def healthCheck = sh "curl ${host}:${port}/healthCheck"
+                if(healthCheck == 'Y') {
+                  echo 'service start success'
+                  sh 'exit 1'
+                } else {
+                  throw new RuntimeException()
+                }
+              } catch (exception e) {
+                echo 'service start fail'
+                sh 'exit 1'
+              }
+            }
+          }
+        }
+
+
       }
     }
 }
