@@ -13,15 +13,32 @@ pipeline {
     }
 
     stages {
-      stage('[Dev] Build'){
+      stage('[Dev] Jenkins variable setting'){
         when {
           branch 'dev'
         }
         steps {
           script {
+              // ------ use Folder Property plugin
+              // Jenkins variable setting
+              wrap([$class: 'ParentFolderBuildWrapper']) {
+                  host = "${env.DEV_HOST}"
+                  port = "${env.DEV_PORT}"
+                  username = "${env.DEV_USERNAME}"
+                  password = "${env.DEV_PASSWORD}"
+              }
+
+              // git last commit setting (for Slack Notification)
               LAST_COMMIT = sh(returnStdout: true, script: "git log -1 --pretty=%B").trim()
           }
+        }
+      }
 
+      stage('[Dev] Build'){
+        when {
+          branch 'dev'
+        }
+        steps {
           sh './gradlew clean build -Pprofile=dev'
         }
       }
@@ -32,27 +49,19 @@ pipeline {
         }
         steps {
           script {
-            // ------ use Folder Property plugin
-            // Jenkins environment variable setting
-            wrap([$class: 'ParentFolderBuildWrapper']) {
-                host = "${env.DEV_HOST}"
-                port = "${env.DEV_PORT}"
-                username = "${env.DEV_USERNAME}"
-                password = "${env.DEV_PASSWORD}"
-            }
             def remote = setRemote(host, username, password)
 
             // ------ use SSH pipeline steps plugin
             // make backup jar
             sshCommand remote: remote, command: "cp ${DEV_SERVER_JAR_PATH}/${DEV_JAR_NAME} ${DEV_SERVER_JAR_PATH}/${DEV_JAR_NAME}_${TODAY}.jar"
 
-            // send jar (Jenkins server -> service server)
+            // send new jar (Jenkins server -> service server)
             sshPut remote: remote, from: env.DEV_JENKINS_SERVER_JAR, into: env.DEV_SERVER_JAR_PATH
           }
         }
       }
 
-      stage('[Dev] Service stop'){
+      stage('[Dev] Service restart'){
         when {
           branch 'dev'
         }
@@ -63,24 +72,15 @@ pipeline {
             sshCommand remote: remote, command: "cd ${DEV_SERVER_JAR_PATH} && ./service.sh stop"
             healthCheck(host, port, "stop", 2)
 
+            sshCommand remote: remote, command: "cd ${DEV_SERVER_JAR_PATH} && ./service.sh start"
+            healthCheck(host, port, "start", 5)
+
             // sshCommand remote: remote, command: "cd ${SERVER_JAR_PATH} && echo '${sweetPassword}' | su sweet -c '${SERVER_JAR_PATH}/service.sh stop'"
           }
         }
       }
 
-      stage ('[Dev] Service start') {
-        when {
-          branch 'dev'
-        }
-        steps {
-          script {
-            def remote = setRemote(host, username, password)
 
-            sshCommand remote: remote, command: "cd ${DEV_SERVER_JAR_PATH} && ./service.sh start"
-            healthCheck(host, port, "start", 5)
-          }
-        }
-      }
 
     }
 }
@@ -105,18 +105,21 @@ def healthCheck(host, port, type, sleepSecond) {
       def checkResult = sh(script: "curl ${host}:${port}/healthCheck", returnStdout: true)
 
       if(checkResult == "Y") {
-        if(type == "stop") {
-           echo 'service stop fail'
-           sh 'exit 1'
-        }
+          if(type == "stop") {
+             echo 'service stop fail'
+             sh 'exit 1'
+          }
+          echo 'service start success'
+
       } else {
-         throw new RuntimeException();
+          throw new RuntimeException();
       }
 
     } catch (Exception e) {
-      if(type == "start") {
-        echo 'service start fail'
-        sh 'exit 1'
-      }
+        if(type == "start") {
+            echo 'service start fail'
+            sh 'exit 1'
+        }
+        echo 'service stop success'
     }
 }
