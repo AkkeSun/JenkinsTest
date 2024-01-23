@@ -102,7 +102,7 @@ def setRemote(host, username, password) {
 
 def healthCheck(host, port, type) {
     try {
-      def checkResult = "curl ${host}:${port}/healthCheck".execute().text
+      def checkResult = sh(script: "curl ${host}:${port}/healthCheck", returnStdout: true)
       echo checkResult
 
       if(checkResult == "Y") {
