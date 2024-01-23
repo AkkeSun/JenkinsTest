@@ -79,42 +79,41 @@ pipeline {
             // sshCommand remote: remote, command: "cd ${SERVER_JAR_PATH} && echo '${sweetPassword}' | su sweet -c '${SERVER_JAR_PATH}/service.sh stop'"
           }
         }
+      }
 
-        stage ('[Dev] Service start') {
-          when {
-            branch 'dev'
-          }
-          steps {
-            script {
+      stage ('[Dev] Service start') {
+        when {
+          branch 'dev'
+        }
+        steps {
+          script {
 
-              def remote = setRemote(host, username, password)
+            def remote = setRemote(host, username, password)
 
-              // service start
-              sshCommand remote: remote, command: "cd ${DEV_SERVER_JAR_PATH} && ./service.sh start"
-              sleep(5)
+            // service start
+            sshCommand remote: remote, command: "cd ${DEV_SERVER_JAR_PATH} && ./service.sh start"
+            sleep(5)
 
-              // health check
-              try {
+            // health check
+            try {
 
-                def healthCheck = sh "curl ${host}:${port}/healthCheck"
-                if(healthCheck == 'Y') {
-                  echo 'service start success'
-                  sh 'exit 1'
-                } else {
-                  throw new RuntimeException()
-                }
-
-              } catch (Exception e) {
-                echo 'service start fail'
+              def healthCheck = sh "curl ${host}:${port}/healthCheck"
+              if(healthCheck == 'Y') {
+                echo 'service start success'
                 sh 'exit 1'
+              } else {
+                throw new RuntimeException()
               }
 
+            } catch (Exception e) {
+              echo 'service start fail'
+              sh 'exit 1'
             }
+
           }
         }
-
-
       }
+
     }
 }
 
