@@ -11,6 +11,9 @@ pipeline {
       LAST_COMMIT = ""
       TODAY= java.time.LocalDate.now()
     }
+    tools {
+        gradle 'gradle-7.5.1'
+    }
 
     stages {
       stage('[Dev] Jenkins variable setting'){
@@ -44,7 +47,7 @@ pipeline {
           branch 'dev'
         }
         steps {
-          sh './gradlew clean build -Pprofile=dev'
+          sh 'gradle clean build -Pprofile=dev'
         }
       }
 
