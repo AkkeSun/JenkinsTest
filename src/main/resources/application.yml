@@ -3,3 +3,6 @@ management:
     web:
       exposure:
         include: prometheus
+
+logging:
+  config: logback.xml
