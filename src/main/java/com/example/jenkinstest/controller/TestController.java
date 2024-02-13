@@ -9,7 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestController {
 
     @GetMapping("/info")
-    public String infoLog() {
+    public String infoLog() throws InterruptedException {
+        Thread.sleep(70000);
         log.info("info");
         return "info";
     }
